@@ -7,7 +7,7 @@ const productRoutes = require('./routes/product.routes');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 'https://create-api-liard.vercel.app/';
 
 // Middleware
 app.use(express.json());
