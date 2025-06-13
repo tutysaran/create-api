@@ -1,37 +1,37 @@
-const Product = require('../models/product.model');
-const multer = require('multer');
-const path = require('path');
+const Product = require("../models/product.model");
+const multer = require("multer");
+const path = require("path");
 
 // Multer storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads'));
+    cb(null, path.join(__dirname, "../uploads"));
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
-const upload = multer({ storage: storage }).array('images', 5);
+const upload = multer({ storage: storage }).array("images", 5);
 
 // Create Product
 const createProduct = async (req, res) => {
   try {
-    const { name, price, category, quantity, description } = req.body;
-    const images = req.files;
+    const { name, price, rating, category, description, images } = req.body;
 
-    if (!name || !price || !category || !quantity || !description || !images?.length) {
-      return res.status(400).json({ message: 'All fields including images are required.' });
+    if (!name || !price || !category || !description || !images || !rating) {
+      return res
+        .status(400)
+        .json({ message: "All fields including images are required." });
     }
-
-    const imagePaths = images.map(file => file.path);
 
     const product = new Product({
       name,
       price,
       rating,
       description,
-      images: imagePaths,
+      images,
+      category,
     });
 
     await product.save();
@@ -55,7 +55,7 @@ const getProducts = async (req, res) => {
 const getProductsById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (!product) return res.status(404).json({ message: "Product not found" });
     res.status(200).json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -65,8 +65,10 @@ const getProductsById = async (req, res) => {
 // Update Product
 const updateProduct = async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ message: 'Product not found' });
+    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!updated) return res.status(404).json({ message: "Product not found" });
     res.status(200).json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -77,8 +79,8 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const deleted = await Product.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: 'Product not found' });
-    res.status(200).json({ message: 'Product deleted successfully' });
+    if (!deleted) return res.status(404).json({ message: "Product not found" });
+    res.status(200).json({ message: "Product deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
